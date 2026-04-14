@@ -1,0 +1,47 @@
+# Environment
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Data (raw and processed data should not be in version control)
+data/raw/
+data/processed/
+data/cleaned/
+data/tokenized/
+
+# Model weights (large binary files — use HuggingFace Hub or Git LFS)
+model/pytorch_model.bin
+model/model.safetensors
+model/checkpoint-*/
+
+# Results
+results/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# HuggingFace cache
+.cache/

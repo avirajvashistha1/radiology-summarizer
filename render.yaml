@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: radiology-summarizer
+    env: docker
+    plan: starter          # Starter plan (512MB RAM is not enough for BART-base; use standard for 2GB)
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: HF_MODEL_NAME
+        value: ""           # Set to your-username/radiology-summarizer after uploading to HF Hub
+      - key: MODEL_DIR
+        value: model
+      - key: HF_HOME
+        value: /var/cache/huggingface
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PORT
+        fromService:
+          type: web
+          name: radiology-summarizer
+          property: port
