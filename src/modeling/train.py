@@ -9,13 +9,20 @@ Usage:
 """
 
 import argparse
+import importlib
 import logging
 import os
 import random
+import sys
+
+# Prevent local evaluate.py from shadowing the 'evaluate' pip package
+_orig_path = sys.path[:]
+sys.path = [p for p in sys.path if os.path.basename(p) != "modeling"]
+import evaluate as hf_evaluate
+sys.path = _orig_path
 
 import numpy as np
 import torch
-import evaluate as hf_evaluate
 from datasets import DatasetDict, load_from_disk
 from transformers import (
     AutoModelForSeq2SeqLM,
@@ -51,7 +58,8 @@ def build_compute_metrics(tokenizer):
     def compute_metrics(eval_preds):
         predictions, labels = eval_preds
 
-        # Decode predictions
+        # Replace -100 in predictions (padding) before decoding
+        predictions = np.where(predictions != -100, predictions, tokenizer.pad_token_id)
         decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
 
         # Replace -100 in labels (padding) before decoding
@@ -148,7 +156,7 @@ def train(
         args=training_args,
         train_dataset=train_ds,
         eval_dataset=val_ds,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         compute_metrics=build_compute_metrics(tokenizer),
     )

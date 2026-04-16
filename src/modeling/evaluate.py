@@ -11,11 +11,19 @@ Usage:
 import argparse
 import json
 import logging
+import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import torch
+
+# Prevent local evaluate.py from shadowing the 'evaluate' pip package
+_orig_path = sys.path[:]
+sys.path = [p for p in sys.path if os.path.basename(p) != "modeling"]
 import evaluate as hf_evaluate
+sys.path = _orig_path
+
 from datasets import load_from_disk
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
@@ -98,12 +106,16 @@ def evaluate_model(
     all_labels = []
     batch_size = 8
 
-    test_ds.set_format(type="torch")
+    from torch.nn.utils.rnn import pad_sequence
 
     for i in range(0, len(test_ds), batch_size):
         batch = test_ds[i : i + batch_size]
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
+
+        # Pad variable-length sequences into tensors
+        input_id_tensors = [torch.tensor(ids) for ids in batch["input_ids"]]
+        attn_mask_tensors = [torch.tensor(m) for m in batch["attention_mask"]]
+        input_ids = pad_sequence(input_id_tensors, batch_first=True, padding_value=tokenizer.pad_token_id).to(device)
+        attention_mask = pad_sequence(attn_mask_tensors, batch_first=True, padding_value=0).to(device)
         labels = batch["labels"]
 
         with torch.no_grad():
@@ -119,7 +131,9 @@ def evaluate_model(
         all_preds.extend([p.strip() for p in decoded_preds])
 
         # Replace -100 (padding) before decoding labels
-        labels_np = labels.numpy()
+        label_tensors = [torch.tensor(l) for l in labels]
+        labels_padded = pad_sequence(label_tensors, batch_first=True, padding_value=-100)
+        labels_np = labels_padded.numpy()
         labels_np = np.where(labels_np != -100, labels_np, tokenizer.pad_token_id)
         decoded_labels = tokenizer.batch_decode(labels_np, skip_special_tokens=True)
         all_labels.extend([l.strip() for l in decoded_labels])

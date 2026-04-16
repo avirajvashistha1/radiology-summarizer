@@ -1,24 +1,24 @@
 # Core data processing
-pandas==2.2.2
-numpy==1.26.4
-pyarrow==16.1.0
-scikit-learn==1.5.0
+pandas>=2.2.3
+numpy>=2.1.0
+pyarrow>=16.1.0
+scikit-learn>=1.6.0
 
 # Deep learning and NLP
-torch==2.3.0
-transformers==4.41.2
-datasets==2.20.0
-evaluate==0.4.2
-tokenizers==0.19.1
-huggingface_hub==0.23.4
+torch>=2.5.0
+transformers>=4.41.2
+datasets>=2.20.0
+evaluate>=0.4.2
+tokenizers>=0.19.1
+huggingface_hub>=0.23.4
 
 # ROUGE scoring
-rouge_score==0.1.2
+rouge_score>=0.1.2
 
 # API
-fastapi==0.111.0
-uvicorn[standard]==0.30.1
-pydantic==2.7.3
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.1
+pydantic>=2.7.3
 
 # Optional: for pushing model to HuggingFace Hub
 # huggingface_hub[cli]==0.23.4
